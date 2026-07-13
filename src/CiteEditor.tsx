@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Compartment, EditorSelection, EditorState, type Extension } from '@codemirror/state';
 import { EditorView, keymap, highlightActiveLine, lineNumbers, placeholder as placeholderExt } from '@codemirror/view';

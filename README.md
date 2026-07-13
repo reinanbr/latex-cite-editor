@@ -51,7 +51,8 @@ Requires React 18+.
 
 ```tsx
 import { useMemo, useState } from 'react';
-import { CiteEditor, parseBibtex, resolveCitations } from 'latex-cite-editor';
+import { parseBibtex, resolveCitations } from 'latex-cite-editor';
+import { CiteEditor } from 'latex-cite-editor/react';
 
 function Editor() {
   const [content, setContent] = useState('');
@@ -77,8 +78,10 @@ fuller pattern — a title/bibliography/content form with a formatting toolbar b
 - `resolveCitations(text: string, entries: BibEntry[]): ResolvedCitations` — replaces every `\cite{key[,key2]}` with numbered, linked markers (ordered by first appearance, like LaTeX + natbib's numeric style) and returns an HTML bibliography block. If an entry has a `url`, `link`, or `doi` field, its bibliography line is wrapped in a link to that address (checked in that order).
 - `extractCiteKeys(text: string): string[]` / `formatEntry(entry: BibEntry): string` / `resolveEntryUrl(entry: BibEntry): string | undefined` — lower-level building blocks. `formatEntry` already runs author/title/journal through `cleanLatexText`.
 - `cleanLatexText(value: string): string` — converts LaTeX accent macros (`{\'e}`, `{\^o}`, `{\c c}`, `{\v c}`, `{\ss}`, ...) as exported by Google Scholar/reference managers into real Unicode (`é`, `ô`, `ç`, `č`, `ß`, ...), and strips leftover `{}` grouping braces.
-- `<CiteEditor />` — the editor component. Props: `value`, `onChange`, `bibEntries`, `fontSize`, `placeholder`, `minHeight`, `className`.
-- `CiteEditorHandle` (via `ref`) — imperative API for toolbars: `focus()`, `getSelection()`, `wrapSelection(before, after, placeholder?)`, `insertAtLineStart(prefix)`, `insertText(text)`, `duplicateCurrentLine()`, `openSearch()`, and the raw CodeMirror `view`.
+- `<CiteEditor />` (from `latex-cite-editor/react`, a `'use client'` module) — the editor component. Props: `value`, `onChange`, `bibEntries`, `fontSize`, `placeholder`, `minHeight`, `className`.
+- `CiteEditorHandle` (from `latex-cite-editor/react`, via `ref`) — imperative API for toolbars: `focus()`, `getSelection()`, `wrapSelection(before, after, placeholder?)`, `insertAtLineStart(prefix)`, `insertText(text)`, `duplicateCurrentLine()`, `openSearch()`, and the raw CodeMirror `view`.
+
+> `<CiteEditor />` lives on a separate `/react` subpath (with its own `'use client'` directive) so that the root entry — `parseBibtex`, `resolveCitations`, and friends — stays free of React/CodeMirror and safe to import from a React Server Component (e.g. to resolve citations at render time on the server).
 - `citationCompletionSource`, `latexCommandCompletionSource`, `latexHighlightPlugin`, `latexHighlightTheme` — exported separately in case you're composing your own CodeMirror extension list instead of using `<CiteEditor />`.
 
 ## Recommended host CSS

@@ -9,5 +9,6 @@ export { cleanLatexText } from './latexText';
 export { citationCompletionSource, latexCommandCompletionSource } from './autocomplete';
 export { latexHighlightPlugin, latexHighlightTheme } from './latexDecorations';
 
-export { default as CiteEditor } from './CiteEditor';
-export type { CiteEditorProps, CiteEditorHandle } from './CiteEditor';
+// The CiteEditor React component lives in a separate './react' entry (see
+// react.ts) so that server-safe consumers of this module (parseBibtex,
+// resolveCitations, etc.) never pull React/CodeMirror into a server bundle.

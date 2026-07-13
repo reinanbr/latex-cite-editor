@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
-import { CiteEditor, parseBibtex, resolveCitations, type CiteEditorHandle } from 'latex-cite-editor';
+import { parseBibtex, resolveCitations } from 'latex-cite-editor';
+import { CiteEditor, type CiteEditorHandle } from 'latex-cite-editor/react';
 
 /**
  * Fuller integration pattern — this is the shape actually used to wire

@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { CiteEditor, parseBibtex, resolveCitations } from 'latex-cite-editor';
+import { parseBibtex, resolveCitations } from 'latex-cite-editor';
+import { CiteEditor } from 'latex-cite-editor/react';
 
 const DEFAULT_BIB = `@article{silva2020,
   author = {Silva, João},

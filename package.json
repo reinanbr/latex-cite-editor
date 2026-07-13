@@ -1,6 +1,6 @@
 {
-  "name": "latex-cite-editor-react",
-  "version": "0.1.0",
+  "name": "latex-cite-editor",
+  "version": "0.1.2",
   "description": "A CodeMirror 6 based React editor with LaTeX-style \\cite{} bibliography autocomplete backed by BibTeX (.bib) files",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "require": "./dist/react.cjs"
     }
   },
   "scripts": {
