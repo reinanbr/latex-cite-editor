@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Adds ABNT NBR 6023 (Brazilian citation standard) formatting: `formatEntryAbnt(entry)` formats a single BibTeX entry — author(s) as "SOBRENOME, Nome" (`et al.` past 3 authors), title in bold, and a per-type layout for `book`, `article`, `incollection`/`inbook`, `inproceedings`/`conference`, `mastersthesis`/`phdthesis`/`monografia`/`monography`, and `techreport`, falling back to a generic layout otherwise. `formatBibliographyAbnt(entries)` formats and alphabetically sorts a whole bibliography (by first-author surname, or title if authorless), as the standard requires. `formatAuthorsAbnt(rawField)` is exposed separately for the author-list logic alone.
+- Exports `escapeHtml`, previously internal to `resolveCitations`'s bibliography rendering, now reusable by the new ABNT formatter and any other consumer.
+- Fixes `cleanLatexText` mishandling three real-world BibTeX macros it previously left broken in the output: `\'\i` / `\'\j` (accents over dotless i/j, e.g. `cient{\'\i}fica` → "científica", common in Google Scholar exports), `\url{...}` (previously left as literal `\urlhttps://...` text instead of the URL), and `\textordmasculine`/`\textordfeminine` (ordinal indicators, → "º"/"ª").
+
 ## 0.1.2
 
 - **Breaking:** package renamed from `latex-cite-editor-react` to `latex-cite-editor`.

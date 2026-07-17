@@ -57,12 +57,25 @@ const ESCAPED_SYMBOLS: Record<string, string> = {
   '}': '}',
 };
 
+// Standalone `\text...` symbol macros with no accentable base character.
+const TEXT_SYMBOLS: Record<string, string> = {
+  ordmasculine: 'º',
+  ordfeminine: 'ª',
+};
+
 const SYMBOL_ACCENT_RE = /\\([`'^"~=.])\{?([a-zA-Z])\}?/g;
 const LETTER_ACCENT_RE = /\\(u|v|H|c|k|r|b|d)(?:\{([a-zA-Z])\}|\s+([a-zA-Z])\b)/g;
 // TeX control words swallow exactly one trailing space (their normal argument
 // separator), so `\OE uvres` renders as one word, "Œuvres" — not "Œ uvres".
 const LIGATURE_RE = /\\(ss|aa|AA|oe|OE|ae|AE|o|O|l|L)(?![a-zA-Z]) ?/g;
 const ESCAPED_SYMBOL_RE = /\\([&%_#$}{])/g;
+const TEXT_SYMBOL_RE = /\\text(ordmasculine|ordfeminine)\b/g;
+const URL_MACRO_RE = /\\url\{([^}]*)\}/g;
+// `\i` / `\j` (dotless i/j) exist so accents have a base letter to sit on,
+// e.g. `{\'\i}` for "í" — most commonly seen from BibTeX exported by
+// reference managers. Resolve them to a plain letter before the accent
+// regexes run, so `\'\i` composes into "í" like `\'i` already does.
+const DOTLESS_RE = /\\([ij])(?![a-zA-Z])/g;
 
 /**
  * Converts LaTeX accent macros and escaped symbols in BibTeX field text
@@ -73,6 +86,11 @@ export function cleanLatexText(value: string): string {
   if (!value) return value;
 
   let text = value;
+
+  // Unwrap \url{...} first so its contents skip every macro substitution below.
+  text = text.replace(URL_MACRO_RE, (_match, url: string) => url);
+
+  text = text.replace(DOTLESS_RE, (_match, letter: string) => letter);
 
   text = text.replace(SYMBOL_ACCENT_RE, (match, cmd: string, letter: string) => {
     const mark = SYMBOL_ACCENTS[cmd];
@@ -89,6 +107,7 @@ export function cleanLatexText(value: string): string {
 
   text = text.replace(LIGATURE_RE, (match, cmd: string) => LIGATURES[cmd] ?? match);
   text = text.replace(ESCAPED_SYMBOL_RE, (match, sym: string) => ESCAPED_SYMBOLS[sym] ?? match);
+  text = text.replace(TEXT_SYMBOL_RE, (match, cmd: string) => TEXT_SYMBOLS[cmd] ?? match);
 
   return text.replace(/[{}]/g, '');
 }

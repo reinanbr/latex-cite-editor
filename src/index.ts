@@ -1,8 +1,11 @@
 export { parseBibtex } from './bibtex';
 export type { BibEntry } from './bibtex';
 
-export { extractCiteKeys, formatEntry, resolveEntryUrl, resolveCitations, CITE_COMMAND_RE } from './citations';
+export { extractCiteKeys, formatEntry, resolveEntryUrl, resolveCitations, escapeHtml, CITE_COMMAND_RE } from './citations';
 export type { BibliographyItem, ResolvedCitations } from './citations';
+
+export { formatAuthorsAbnt, formatEntryAbnt, formatBibliographyAbnt } from './abnt';
+export type { AbntReference } from './abnt';
 
 export { cleanLatexText } from './latexText';
 
