@@ -22,7 +22,11 @@
 - [Installation](#installation)
 - [Quickstart](#quickstart)
 - [ABNT bibliography formatting](#abnt-bibliography-formatting)
-- [More citation styles & reference-manager export](#more-citation-styles--reference-manager-export)
+- [IEEE bibliography formatting](#ieee-bibliography-formatting)
+- [MLA bibliography formatting](#mla-bibliography-formatting)
+- [APA bibliography formatting](#apa-bibliography-formatting)
+- [Reference-manager export (EndNote, RefMan, RefWorks)](#reference-manager-export-endnote-refman-refworks)
+- [Combining a style with `\cite{}` numbering](#combining-a-style-with-cite-numbering)
 - [API](#api)
 - [Recommended host CSS](#recommended-host-css)
 - [Docs site & live examples](#docs-site--live-examples)
@@ -119,42 +123,129 @@ dependency, this works the same in a React Server Component — see
 [`examples/abnt-bibliography.tsx`](examples/abnt-bibliography.tsx), which resolves the
 bibliography at render time on the server, no `'use client'` needed.
 
-## More citation styles & reference-manager export
-
-Besides ABNT, the same `.bib` file can be formatted per **IEEE**, **MLA** (9th ed.), or **APA**
-(7th ed.) — or exported wholesale as a plain-text file for importing into **EndNote**, **Reference
-Manager** ("RefMan", RIS format), or **RefWorks**. This mirrors the split Google Scholar's own
-"Cite" dropdown uses: display styles vs. import formats.
+## IEEE bibliography formatting
 
 ```tsx
-import { parseBibtex, formatBibliography, exportBibliography } from 'latex-cite-editor';
+import { parseBibtex, formatBibliographyIeee } from 'latex-cite-editor';
+
+const entries = parseBibtex(bibText);
+const references = formatBibliographyIeee(entries); // preserves input order — see note below
+
+function Bibliography() {
+  return (
+    <ol>
+      {references.map((ref) => (
+        <li key={ref.key} dangerouslySetInnerHTML={{ __html: ref.html }} />
+      ))}
+    </ol>
+  );
+}
+```
+
+Each reference comes out as `F. Last, "Title of paper," Journal Name, vol. X, no. Y, pp. Z-Z,
+Year.` (or `and`/`et al.` past six authors), following the IEEE Editorial Style Manual: titles of
+works contained in something else (articles, chapters, conference papers, theses) are quoted,
+while standalone containers (books, journals, proceedings) are italicized. **Unlike ABNT/MLA/APA,
+`formatBibliographyIeee` does not alphabetize** — IEEE numbers references by citation order, so
+pass entries already in the order you want them numbered (an `<ol>` then supplies the `[n]`).
+
+## MLA bibliography formatting
+
+```tsx
+import { parseBibtex, formatBibliographyMla } from 'latex-cite-editor';
+
+const entries = parseBibtex(bibText);
+const references = formatBibliographyMla(entries); // sorted alphabetically by author surname
+
+function WorksCited() {
+  return (
+    <ol>
+      {references.map((ref) => (
+        <li key={ref.key} dangerouslySetInnerHTML={{ __html: ref.html }} />
+      ))}
+    </ol>
+  );
+}
+```
+
+Each reference comes out as `Last, First. "Title of Source." Container, vol. X, no. Y, Year, pp.
+Z-Z.` per MLA (9th ed.): `Last, First, and First Last.` for two authors, collapsing to `Last,
+First, et al.` past two; titles of works contained in something else are quoted, standalone
+containers (books, journals, proceedings) are italicized.
+
+## APA bibliography formatting
+
+```tsx
+import { parseBibtex, formatBibliographyApa } from 'latex-cite-editor';
+
+const entries = parseBibtex(bibText);
+const references = formatBibliographyApa(entries); // sorted alphabetically by author surname
+
+function References() {
+  return (
+    <ol>
+      {references.map((ref) => (
+        <li key={ref.key} dangerouslySetInnerHTML={{ __html: ref.html }} />
+      ))}
+    </ol>
+  );
+}
+```
+
+Each reference comes out as `Last, F. M. (Year). Title of work. Journal Name, Volume(Issue),
+pages.` per APA (7th ed.): authors are `&`-joined (`Last, F. M., & Last, F. M.`) for up to 20,
+with the 21+-author ellipsis rule past that. APA never quotes or italicizes the title of the work
+itself — only the *container* (journal name + volume, or an edited book) is italicized.
+
+## Reference-manager export (EndNote, RefMan, RefWorks)
+
+Besides the display styles above, a whole `.bib` file can be exported as a single plain-text file
+for importing into a reference manager — the same "Import into: BibTeX / EndNote / RefMan /
+RefWorks" split Google Scholar's own "Cite" dropdown uses, as opposed to its display styles (MLA,
+APA, ...).
+
+```tsx
+import { parseBibtex, exportEndNote, exportRefMan, exportRefWorks } from 'latex-cite-editor';
 
 const entries = parseBibtex(bibText);
 
-// Display styles — each returns FormattedReference[] ({ key, html, sortKey }):
-const ieee = formatBibliography(entries, 'ieee'); // preserves input order (numbered by citation order)
-const mla = formatBibliography(entries, 'mla'); // alphabetized by author surname
-const apa = formatBibliography(entries, 'apa'); // alphabetized by author surname
+const endnoteFile = exportEndNote(entries); // .enw tagged format: "%0 Journal Article", "%A Author", ...
+const risFile = exportRefMan(entries); // .ris format: "TY  - JOUR", "AU  - Author", ...
+const refworksFile = exportRefWorks(entries); // RefWorks tagged format: "RT Journal Article", "A1 Author", ...
 
-// Reference-manager export — each returns a single ready-to-download file string:
-const endnoteFile = exportBibliography(entries, 'endnote'); // .enw tagged format
-const risFile = exportBibliography(entries, 'refman'); // .ris format
-const refworksFile = exportBibliography(entries, 'refworks'); // RefWorks tagged format
+// Trigger a browser download for any of them:
+function downloadFile(filename: string, content: string) {
+  const url = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));
+  Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+  URL.revokeObjectURL(url);
+}
 ```
 
-Per-style functions (`formatBibliographyIeee`, `formatEntryMla`, `formatAuthorsApa`, ...) and
-per-format functions (`exportEndNote`, `exportRefMan`, `exportRefWorks`) are also exported directly
-if you don't need the `style`/`format` dispatcher.
+Each function returns the *entire* bibliography as one string (entries separated by a blank
+line) — ready to hand to `downloadFile()` above, or write straight to a `.enw`/`.ris`/`.txt` file.
 
-`formatBibliography` is for a *standalone* reference list (it alphabetizes for MLA/APA/ABNT, since
-that's what those standards require). If you're using `\cite{}` + `resolveCitations` instead, pass
-`{ style }` to it directly — see [above](#quickstart) — so the bibliography stays in `[1][2][3]`
-citation order (as it must, to match the in-text markers) while each line is formatted per that
-style.
+## Combining a style with `\cite{}` numbering
 
-See
-[`examples/citation-styles.tsx`](examples/citation-styles.tsx) for a live style-switcher + export
-picker, or the [docs site](#docs-site--live-examples).
+The functions above (`formatBibliographyIeee`, `formatBibliographyMla`, `formatBibliographyApa`,
+`formatBibliographyAbnt`) are for a *standalone* reference list — MLA/APA/ABNT alphabetize, since
+that's what those standards require. If you're using `\cite{}` + `resolveCitations` instead, pass
+`{ style }` to it directly (see [Quickstart](#quickstart)) so the bibliography stays in `[1][2][3]`
+citation order — as it must, to match the in-text markers — while each line is formatted per that
+style:
+
+```tsx
+import { parseBibtex, resolveCitations, formatBibliography, exportBibliography } from 'latex-cite-editor';
+
+const entries = parseBibtex(bibText);
+const { bibliographyHtml } = resolveCitations(markdownSource, entries, { style: 'ieee' });
+
+// Or reach for the dispatchers instead of importing each style/format function by name:
+const mla = formatBibliography(entries, 'mla'); // same as formatBibliographyMla(entries)
+const risFile = exportBibliography(entries, 'refman'); // same as exportRefMan(entries)
+```
+
+See [`examples/citation-styles.tsx`](examples/citation-styles.tsx) for a live style-switcher +
+export picker, or the [docs site](#docs-site--live-examples).
 
 ## API
 
@@ -164,7 +255,7 @@ picker, or the [docs site](#docs-site--live-examples).
 - `formatBibliographyAbnt(entries: BibEntry[]): AbntReference[]` — formats every entry per **ABNT NBR 6023** (see [above](#abnt-bibliography-formatting)) and sorts the result alphabetically by author surname (or title, if authorless). Each `AbntReference` is `{ key, html, sortKey }`, where `html` is escaped and ready to inject (title wrapped in `<strong>`).
 - `formatEntryAbnt(entry: BibEntry): AbntReference` — the single-entry version behind `formatBibliographyAbnt`, if you want to format/sort a list yourself.
 - `formatAuthorsAbnt(rawAuthorField: string): string` — just the author-list logic: `and`-separated BibTeX names into `"SOBRENOME, Nome"`, joined with `; `, collapsing to `"PRIMEIRO SOBRENOME, Nome et al."` past three authors (or when the field contains a bare `others`).
-- `formatBibliographyIeee` / `formatBibliographyMla` / `formatBibliographyApa(entries: BibEntry[]): FormattedReference[]` (plus matching `formatEntryIeee`/`formatEntryMla`/`formatEntryApa` and `formatAuthorsIeee`/`formatAuthorsMla`/`formatAuthorsApa`) — same shape as the ABNT functions, formatting per IEEE, MLA (9th ed.), or APA (7th ed.) instead (see [above](#more-citation-styles--reference-manager-export)). IEEE preserves input order (it numbers by citation order, not alphabetically); MLA and APA alphabetize by author surname like ABNT.
+- `formatBibliographyIeee` / `formatBibliographyMla` / `formatBibliographyApa(entries: BibEntry[]): FormattedReference[]` (plus matching `formatEntryIeee`/`formatEntryMla`/`formatEntryApa` and `formatAuthorsIeee`/`formatAuthorsMla`/`formatAuthorsApa`) — same shape as the ABNT functions, formatting per [IEEE](#ieee-bibliography-formatting), [MLA](#mla-bibliography-formatting) (9th ed.), or [APA](#apa-bibliography-formatting) (7th ed.) instead. IEEE preserves input order (it numbers by citation order, not alphabetically); MLA and APA alphabetize by author surname like ABNT.
 - `formatBibliography(entries: BibEntry[], style: CitationStyle): FormattedReference[]` — dispatcher over all four styles, where `CitationStyle = 'abnt' | 'ieee' | 'mla' | 'apa'`. `AbntReference`/`IeeeReference`/`MlaReference`/`ApaReference` are all aliases of the shared `FormattedReference` shape (`{ key, html, sortKey }`).
 - `exportEndNote` / `exportRefMan` / `exportRefWorks(entries: BibEntry[]): string` — export the whole bibliography as a single plain-text file: EndNote's tagged (`.enw`) format, RIS (`.ris`, "RefMan"), or RefWorks' tagged format, for importing into a reference manager rather than displaying on a page.
 - `exportBibliography(entries: BibEntry[], format: ExportFormat): string` — dispatcher over the three export formats, where `ExportFormat = 'endnote' | 'refman' | 'refworks'`.
@@ -194,7 +285,7 @@ design system:
 
 **https://reinanbr.github.io/latex-cite-editor/**
 
-A static site (source in [`docs-src/`](docs-src)) renders the three files in [`examples/`](examples)
+A static site (source in [`docs-src/`](docs-src)) renders the files in [`examples/`](examples)
 as real, interactive `<CiteEditor />` instances — not screenshots — plus the API reference above. It's
 built with Vite, aliasing the `latex-cite-editor`/`latex-cite-editor/react` imports in the example
 files straight to [`src/`](src), so the demo always reflects the current code.
