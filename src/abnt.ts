@@ -1,32 +1,14 @@
 import type { BibEntry } from './bibtex';
 import { cleanLatexText } from './latexText';
 import { escapeHtml, resolveEntryUrl } from './citations';
+import { isInstitutionalAuthor, splitAuthorField, splitNameParts } from './nameParsing';
+import type { FormattedReference } from './referenceTypes';
 
 /** SOBRENOME, Nome do Meio — the per-author ABNT NBR 6023 form. */
 function formatSingleAuthorAbnt(name: string): string {
-  const trimmed = name.trim();
-  if (!trimmed) return '';
-  if (trimmed.includes(',')) {
-    const commaIdx = trimmed.indexOf(',');
-    const last = trimmed.slice(0, commaIdx).trim();
-    const rest = trimmed.slice(commaIdx + 1).trim();
-    return rest ? `${last.toUpperCase()}, ${rest}` : last.toUpperCase();
-  }
-  const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) return parts[0].toUpperCase();
-  const last = parts.pop()!;
-  return `${last.toUpperCase()}, ${parts.join(' ')}`;
-}
-
-/**
- * BibTeX wraps corporate/institutional authors (e.g. `{NASA Exoplanet Archive}`)
- * in an outer brace pair specifically so name-parsing tools don't split them
- * into "Last, First" — checked on the raw (pre-cleanLatexText) field text,
- * since cleanLatexText strips braces before this can be detected.
- */
-function isInstitutionalAuthor(rawName: string): boolean {
-  const trimmed = rawName.trim();
-  return trimmed.startsWith('{') && trimmed.endsWith('}') && !trimmed.slice(1, -1).includes('}');
+  const { last, given } = splitNameParts(name);
+  if (!last) return '';
+  return given ? `${last.toUpperCase()}, ${given}` : last.toUpperCase();
 }
 
 /**
@@ -35,31 +17,17 @@ function isInstitutionalAuthor(rawName: string): boolean {
  * collapsed to "PRIMEIRO SOBRENOME, Nome et al."
  */
 export function formatAuthorsAbnt(rawAuthorField: string): string {
-  if (!rawAuthorField) return '';
-  const rawAuthors = rawAuthorField
-    .split(/\s+and\s+/i)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const hasEtAl = rawAuthors.some((a) => a.toLowerCase() === 'others');
-  const formatted = rawAuthors
-    .filter((a) => a.toLowerCase() !== 'others')
-    .map((raw) =>
-      isInstitutionalAuthor(raw) ? cleanLatexText(raw).toUpperCase() : formatSingleAuthorAbnt(cleanLatexText(raw))
-    );
+  const { names, hasEtAl } = splitAuthorField(rawAuthorField);
+  const formatted = names.map((raw) =>
+    isInstitutionalAuthor(raw) ? cleanLatexText(raw).toUpperCase() : formatSingleAuthorAbnt(cleanLatexText(raw))
+  );
 
   if (formatted.length === 0) return '';
   if (formatted.length > 3 || hasEtAl) return `${formatted[0]} et al.`;
   return formatted.join('; ');
 }
 
-export interface AbntReference {
-  key: string;
-  /** Ready-to-inject, already-escaped HTML (title wrapped in <strong>). */
-  html: string;
-  /** Upper-cased first-author surname (or title, if authorless) — the ABNT alphabetical sort key. */
-  sortKey: string;
-}
+export type AbntReference = FormattedReference;
 
 /** Formats a single BibTeX entry as an ABNT NBR 6023 reference-list entry. */
 export function formatEntryAbnt(entry: BibEntry): AbntReference {

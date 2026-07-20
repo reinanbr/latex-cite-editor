@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Adds IEEE, MLA (9th ed.), and APA (7th ed.) bibliography formatting, alongside the existing ABNT support: `formatBibliographyIeee`/`formatBibliographyMla`/`formatBibliographyApa` (plus matching `formatEntry*`/`formatAuthors*` pairs) return the same `{ key, html, sortKey }` shape as `formatBibliographyAbnt`. IEEE preserves input order (it numbers by citation order, not alphabetically); MLA/APA alphabetize by author surname.
+- Adds `formatBibliography(entries, style)`, a dispatcher over all four styles (`CitationStyle = 'abnt' | 'ieee' | 'mla' | 'apa'`). `AbntReference`/`IeeeReference`/`MlaReference`/`ApaReference` are now aliases of a shared exported `FormattedReference` type.
+- Adds reference-manager export: `exportEndNote`/`exportRefMan`/`exportRefWorks(entries)` produce a single plain-text file in EndNote's tagged (`.enw`) format, RIS (`.ris`, "RefMan"), or RefWorks' tagged format, respectively — for importing into a reference manager rather than displaying on a page. `exportBibliography(entries, format)` dispatches over the three (`ExportFormat = 'endnote' | 'refman' | 'refworks'`).
+
 ## 0.2.0
 
 - Adds ABNT NBR 6023 (Brazilian citation standard) formatting: `formatEntryAbnt(entry)` formats a single BibTeX entry — author(s) as "SOBRENOME, Nome" (`et al.` past 3 authors), title in bold, and a per-type layout for `book`, `article`, `incollection`/`inbook`, `inproceedings`/`conference`, `mastersthesis`/`phdthesis`/`monografia`/`monography`, and `techreport`, falling back to a generic layout otherwise. `formatBibliographyAbnt(entries)` formats and alphabetically sorts a whole bibliography (by first-author surname, or title if authorless), as the standard requires. `formatAuthorsAbnt(rawField)` is exposed separately for the author-list logic alone.

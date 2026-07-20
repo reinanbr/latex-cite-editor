@@ -1,6 +1,6 @@
 {
   "name": "latex-cite-editor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A CodeMirror 6 based React editor with LaTeX-style \\cite{} bibliography autocomplete backed by BibTeX (.bib) files",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -23,7 +23,9 @@
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "docs:dev": "vite --config docs-src/vite.config.ts",
+    "docs:build": "vite build --config docs-src/vite.config.ts"
   },
   "keywords": [
     "react",
@@ -35,7 +37,13 @@
     "bibliography",
     "markdown",
     "editor",
-    "autocomplete"
+    "autocomplete",
+    "abnt",
+    "ieee",
+    "mla",
+    "apa",
+    "endnote",
+    "refworks"
   ],
   "author": "ReinanBr",
   "license": "MIT",
@@ -59,10 +67,12 @@
   "devDependencies": {
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.7.0",
     "react": "^19",
     "react-dom": "^19",
     "tsup": "^8.3.5",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vite": "^6.4.3"
   },
   "files": [
     "dist",

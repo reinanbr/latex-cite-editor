@@ -8,6 +8,8 @@
 [![types](https://img.shields.io/npm/types/latex-cite-editor.svg)](https://www.npmjs.com/package/latex-cite-editor)
 [![license](https://img.shields.io/npm/l/latex-cite-editor.svg)](LICENSE)
 
+**[Live docs & examples →](https://reinanbr.github.io/latex-cite-editor/)**
+
 <p>A CodeMirror 6 based React editor for Markdown articles with LaTeX-flavored extras: <code>\cite&#123;key&#125;</code> citations resolved against a BibTeX (<code>.bib</code>) file, autocomplete for citation keys, LaTeX-like commands (<code>\textbf</code>, <code>\section</code>, <code>\footnote</code>, ...), math symbols inside <code>$...$</code>/<code>$$...$$</code>, and ABNT NBR 6023 (Brazilian standard) bibliography formatting.</p>
 
 </div>
@@ -20,8 +22,10 @@
 - [Installation](#installation)
 - [Quickstart](#quickstart)
 - [ABNT bibliography formatting](#abnt-bibliography-formatting)
+- [More citation styles & reference-manager export](#more-citation-styles--reference-manager-export)
 - [API](#api)
 - [Recommended host CSS](#recommended-host-css)
+- [Docs site & live examples](#docs-site--live-examples)
 - [License](#license)
 
 <hr>
@@ -111,6 +115,35 @@ dependency, this works the same in a React Server Component — see
 [`examples/abnt-bibliography.tsx`](examples/abnt-bibliography.tsx), which resolves the
 bibliography at render time on the server, no `'use client'` needed.
 
+## More citation styles & reference-manager export
+
+Besides ABNT, the same `.bib` file can be formatted per **IEEE**, **MLA** (9th ed.), or **APA**
+(7th ed.) — or exported wholesale as a plain-text file for importing into **EndNote**, **Reference
+Manager** ("RefMan", RIS format), or **RefWorks**. This mirrors the split Google Scholar's own
+"Cite" dropdown uses: display styles vs. import formats.
+
+```tsx
+import { parseBibtex, formatBibliography, exportBibliography } from 'latex-cite-editor';
+
+const entries = parseBibtex(bibText);
+
+// Display styles — each returns FormattedReference[] ({ key, html, sortKey }):
+const ieee = formatBibliography(entries, 'ieee'); // preserves input order (numbered by citation order)
+const mla = formatBibliography(entries, 'mla'); // alphabetized by author surname
+const apa = formatBibliography(entries, 'apa'); // alphabetized by author surname
+
+// Reference-manager export — each returns a single ready-to-download file string:
+const endnoteFile = exportBibliography(entries, 'endnote'); // .enw tagged format
+const risFile = exportBibliography(entries, 'refman'); // .ris format
+const refworksFile = exportBibliography(entries, 'refworks'); // RefWorks tagged format
+```
+
+Per-style functions (`formatBibliographyIeee`, `formatEntryMla`, `formatAuthorsApa`, ...) and
+per-format functions (`exportEndNote`, `exportRefMan`, `exportRefWorks`) are also exported directly
+if you don't need the `style`/`format` dispatcher. See
+[`examples/citation-styles.tsx`](examples/citation-styles.tsx) for a live style-switcher + export
+picker, or the [docs site](#docs-site--live-examples).
+
 ## API
 
 - `parseBibtex(source: string): BibEntry[]` — parses `.bib` text (handles nested braces in field values, e.g. `title = {The {Higgs} Boson}`).
@@ -119,6 +152,10 @@ bibliography at render time on the server, no `'use client'` needed.
 - `formatBibliographyAbnt(entries: BibEntry[]): AbntReference[]` — formats every entry per **ABNT NBR 6023** (see [above](#abnt-bibliography-formatting)) and sorts the result alphabetically by author surname (or title, if authorless). Each `AbntReference` is `{ key, html, sortKey }`, where `html` is escaped and ready to inject (title wrapped in `<strong>`).
 - `formatEntryAbnt(entry: BibEntry): AbntReference` — the single-entry version behind `formatBibliographyAbnt`, if you want to format/sort a list yourself.
 - `formatAuthorsAbnt(rawAuthorField: string): string` — just the author-list logic: `and`-separated BibTeX names into `"SOBRENOME, Nome"`, joined with `; `, collapsing to `"PRIMEIRO SOBRENOME, Nome et al."` past three authors (or when the field contains a bare `others`).
+- `formatBibliographyIeee` / `formatBibliographyMla` / `formatBibliographyApa(entries: BibEntry[]): FormattedReference[]` (plus matching `formatEntryIeee`/`formatEntryMla`/`formatEntryApa` and `formatAuthorsIeee`/`formatAuthorsMla`/`formatAuthorsApa`) — same shape as the ABNT functions, formatting per IEEE, MLA (9th ed.), or APA (7th ed.) instead (see [above](#more-citation-styles--reference-manager-export)). IEEE preserves input order (it numbers by citation order, not alphabetically); MLA and APA alphabetize by author surname like ABNT.
+- `formatBibliography(entries: BibEntry[], style: CitationStyle): FormattedReference[]` — dispatcher over all four styles, where `CitationStyle = 'abnt' | 'ieee' | 'mla' | 'apa'`. `AbntReference`/`IeeeReference`/`MlaReference`/`ApaReference` are all aliases of the shared `FormattedReference` shape (`{ key, html, sortKey }`).
+- `exportEndNote` / `exportRefMan` / `exportRefWorks(entries: BibEntry[]): string` — export the whole bibliography as a single plain-text file: EndNote's tagged (`.enw`) format, RIS (`.ris`, "RefMan"), or RefWorks' tagged format, for importing into a reference manager rather than displaying on a page.
+- `exportBibliography(entries: BibEntry[], format: ExportFormat): string` — dispatcher over the three export formats, where `ExportFormat = 'endnote' | 'refman' | 'refworks'`.
 - `cleanLatexText(value: string): string` — converts LaTeX accent macros (`{\'e}`, `{\^o}`, `{\c c}`, `{\v c}`, `{\ss}`, `{\'\i}`, ...) and symbol macros (`\url{...}`, `\textordmasculine`) as exported by Google Scholar/reference managers into real Unicode (`é`, `ô`, `ç`, `č`, `ß`, `í`, ...), and strips leftover `{}` grouping braces.
 - `escapeHtml(value: string): string` — escapes `&`/`<`/`>`/`"`, used internally by `resolveCitations` and the ABNT formatter; exported for building your own HTML output from `BibEntry` fields.
 - `<CiteEditor />` (from `latex-cite-editor/react`, a `'use client'` module) — the editor component. Props: `value`, `onChange`, `bibEntries`, `fontSize`, `placeholder`, `minHeight`, `className`.
@@ -140,6 +177,24 @@ design system:
 .bibliography .citation-link { text-decoration: underline; }
 .citation-backref { text-decoration: none; opacity: 0.6; }
 ```
+
+## Docs site & live examples
+
+**https://reinanbr.github.io/latex-cite-editor/**
+
+A static site (source in [`docs-src/`](docs-src)) renders the three files in [`examples/`](examples)
+as real, interactive `<CiteEditor />` instances — not screenshots — plus the API reference above. It's
+built with Vite, aliasing the `latex-cite-editor`/`latex-cite-editor/react` imports in the example
+files straight to [`src/`](src), so the demo always reflects the current code.
+
+```bash
+npm run docs:dev    # serve the docs site locally with hot reload
+npm run docs:build  # build to ./docs (the GitHub Pages source for this repo)
+```
+
+After changing `src/` or `examples/`, run `npm run docs:build` and commit the updated `docs/` folder
+so the published site stays in sync. (One-time repo setup: Settings → Pages → Deploy from a branch →
+`main` / `docs`.)
 
 ## License
 

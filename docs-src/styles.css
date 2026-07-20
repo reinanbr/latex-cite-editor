@@ -1,0 +1,244 @@
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --code-bg: #f5f5f7;
+  --panel-bg: #fafafa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1115;
+    --fg: #e6e6e6;
+    --muted: #9aa0a6;
+    --border: #2a2d33;
+    --accent: #60a5fa;
+    --code-bg: #1a1d23;
+    --panel-bg: #161920;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.brand-dim {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.topnav {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.nav-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.nav-btn.active {
+  color: var(--accent);
+  border-color: var(--border);
+  background: var(--panel-bg);
+}
+
+.topbar-links {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.topbar-links a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.topbar-links a:hover {
+  color: var(--accent);
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  width: 100%;
+  flex: 1;
+}
+
+.section-note {
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 70ch;
+}
+
+.section-note a {
+  color: var(--accent);
+}
+
+.prose h2 {
+  margin-top: 2em;
+}
+
+.prose h2:first-child {
+  margin-top: 0;
+}
+
+.prose ul {
+  padding-left: 1.2em;
+}
+
+.prose li {
+  margin-bottom: 0.6em;
+}
+
+.prose code {
+  background: var(--code-bg);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+
+.code-block code {
+  background: none;
+  padding: 0;
+  white-space: pre;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 14px 0 4px;
+}
+
+textarea {
+  background: var(--panel-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+button {
+  font-family: inherit;
+}
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.footer a {
+  color: var(--accent);
+}
+
+/* Recommended host CSS for the library's citation/bibliography markup
+   (see README "Recommended host CSS"), applied globally so every live
+   example on this page renders citations consistently. */
+.citation-ref a {
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--accent);
+}
+.citation-ref.citation-missing {
+  color: #ef4444;
+}
+.bibliography {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.bibliography ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.bibliography li {
+  margin-bottom: 0.5rem;
+}
+.bibliography .citation-link {
+  text-decoration: underline;
+  color: var(--accent);
+}
+.citation-backref {
+  text-decoration: none;
+  opacity: 0.6;
+}
+
+.cm-editor {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.cm-editor.cm-focused {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
