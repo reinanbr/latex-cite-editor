@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- `resolveCitations(text, entries, options?)` now accepts `{ style: 'ieee' | 'mla' | 'apa' | 'abnt' }` to format each `\cite{}`-driven bibliography line per that citation style, while keeping the `[1][2][3]` numbering in citation order (as opposed to `formatBibliography`, which alphabetizes for a standalone reference list). `BibliographyItem` gains an optional `html` field carrying the styled line.
+- Fixes default (no-`style`) bibliography output being hardcoded to Portuguese ("Referências", "Referência não encontrada no .bib") — an OSS library aimed at an international audience should default to English; ABNT's own Portuguese terminology (`Disponível em`, `SOBRENOME`, ...) is unaffected, since that's inherent to the standard itself.
+- Translates `examples/basic-usage.tsx` and `examples/article-editor-with-toolbar.tsx` (previously partly in Portuguese) to English, and adds a citation-style picker to the basic-usage example demonstrating the new `resolveCitations` option live.
+
 ## 0.3.0
 
 - Adds IEEE, MLA (9th ed.), and APA (7th ed.) bibliography formatting, alongside the existing ABNT support: `formatBibliographyIeee`/`formatBibliographyMla`/`formatBibliographyApa` (plus matching `formatEntry*`/`formatAuthors*` pairs) return the same `{ key, html, sortKey }` shape as `formatBibliographyAbnt`. IEEE preserves input order (it numbers by citation order, not alphabetically); MLA/APA alphabetize by author surname.

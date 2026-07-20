@@ -1,6 +1,6 @@
 import type { BibEntry } from './bibtex';
 import { cleanLatexText } from './latexText';
-import { resolveEntryUrl } from './citations';
+import { resolveEntryUrl } from './entryUtils';
 import { splitAuthorField, splitNameParts } from './nameParsing';
 
 /**

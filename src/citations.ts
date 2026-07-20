@@ -1,15 +1,11 @@
 import type { BibEntry } from './bibtex';
 import { cleanLatexText } from './latexText';
+import { escapeHtml, resolveEntryUrl } from './entryUtils';
+import { formatEntryForStyle, type CitationStyle } from './styles';
 
 export const CITE_COMMAND_RE = /\\cite\{([^}]*)\}/g;
 
-export function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+export { escapeHtml, resolveEntryUrl } from './entryUtils';
 
 /** Order of first appearance, deduplicated, across every \cite{...} in the text. */
 export function extractCiteKeys(text: string): string[] {
@@ -31,7 +27,7 @@ export function extractCiteKeys(text: string): string[] {
 /** Formats a single BibTeX entry as a plain reference-list line (numeric/IEEE-ish style). */
 export function formatEntry(entry: BibEntry): string {
   const f = entry.fields;
-  const author = f.author ? cleanLatexText(f.author.replace(/\s+and\s+/g, ', ')) : 'Autor desconhecido';
+  const author = f.author ? cleanLatexText(f.author.replace(/\s+and\s+/g, ', ')) : 'Unknown author';
   const year = f.year ? ` (${f.year})` : '';
   const title = f.title ? ` ${cleanLatexText(f.title)}.` : '';
   const venue = f.journal || f.booktitle || f.publisher || '';
@@ -40,18 +36,14 @@ export function formatEntry(entry: BibEntry): string {
   return text.trim();
 }
 
-/** Resolves the URL a bibliography entry should link to, if any (`url`, `link`, then `doi`). */
-export function resolveEntryUrl(entry: BibEntry): string | undefined {
-  const f = entry.fields;
-  return f.url || f.link || (f.doi ? `https://doi.org/${f.doi}` : undefined);
-}
-
 export interface BibliographyItem {
   key: string;
   index: number;
   entry?: BibEntry;
   text: string;
   url?: string;
+  /** Present when `resolveCitations` is called with a `style` option: the entry formatted per that citation style (ready-to-inject HTML), used in place of `text` when building `bibliographyHtml`. */
+  html?: string;
 }
 
 export interface ResolvedCitations {
@@ -62,12 +54,27 @@ export interface ResolvedCitations {
   bibliographyHtml: string;
 }
 
+export interface ResolveCitationsOptions {
+  /**
+   * Formats each bibliography entry per this citation style (IEEE, MLA, APA,
+   * or ABNT) instead of the default plain numeric line. Citation-order
+   * numbering (the `[1]`/`[2]`/... markers) is unaffected either way — only
+   * ABNT/MLA/APA's own alphabetical sorting is skipped here, since the
+   * bibliography list must stay in the same order as the in-text markers.
+   */
+  style?: CitationStyle;
+}
+
 /**
  * Resolves \cite{...} commands against parsed BibTeX entries, numbering them
  * by order of first appearance (like LaTeX + natbib's numeric style), and
  * builds the trailing bibliography section.
  */
-export function resolveCitations(text: string, entries: BibEntry[]): ResolvedCitations {
+export function resolveCitations(
+  text: string,
+  entries: BibEntry[],
+  options: ResolveCitationsOptions = {}
+): ResolvedCitations {
   const byKey = new Map(entries.map((e) => [e.key, e]));
   const order = extractCiteKeys(text);
   const indexOf = new Map(order.map((key, idx) => [key, idx + 1]));
@@ -95,18 +102,20 @@ export function resolveCitations(text: string, entries: BibEntry[]): ResolvedCit
       key,
       index: idx,
       entry,
-      text: entry ? formatEntry(entry) : `Referência não encontrada no .bib: ${key}`,
+      text: entry ? formatEntry(entry) : `Reference not found in .bib: ${key}`,
       url: entry ? resolveEntryUrl(entry) : undefined,
+      html: entry && options.style ? formatEntryForStyle(entry, options.style).html : undefined,
     };
   });
 
   const bibliographyHtml = bibliography.length
-    ? `<div class="bibliography"><h2>Referências</h2><ol>${bibliography
+    ? `<div class="bibliography"><h2>References</h2><ol>${bibliography
         .map((item) => {
-          const escapedText = escapeHtml(item.text);
-          const body = item.url
-            ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">${escapedText}</a>`
-            : escapedText;
+          const body = item.html
+            ? item.html
+            : item.url
+              ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" class="citation-link">${escapeHtml(item.text)}</a>`
+              : escapeHtml(item.text);
           return `<li id="cite-${item.index}">${body} <a href="#cite-ref-${item.index}-1" class="citation-backref">↩</a></li>`;
         })
         .join('')}</ol></div>`

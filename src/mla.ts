@@ -1,6 +1,6 @@
 import type { BibEntry } from './bibtex';
 import { cleanLatexText } from './latexText';
-import { escapeHtml, resolveEntryUrl } from './citations';
+import { escapeHtml, resolveEntryUrl } from './entryUtils';
 import { isInstitutionalAuthor, splitAuthorField, splitNameParts } from './nameParsing';
 import type { FormattedReference } from './referenceTypes';
 import { stripTrailingConnector } from './citationClauses';

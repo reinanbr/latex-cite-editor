@@ -96,11 +96,14 @@ function ApiReference() {
           nested braces in field values, e.g. <code>{'title = {The {Higgs} Boson}'}</code>).
         </li>
         <li>
-          <code>resolveCitations(text: string, entries: BibEntry[]): ResolvedCitations</code> — replaces
-          every <code>{'\\cite{key[,key2]}'}</code> with numbered, linked markers (ordered by first
-          appearance, like LaTeX + natbib's numeric style) and returns an HTML bibliography block. If an
-          entry has a <code>url</code>, <code>link</code>, or <code>doi</code> field, its bibliography line
-          is wrapped in a link to that address (checked in that order).
+          <code>resolveCitations(text: string, entries: BibEntry[], options?: {'{ style?: CitationStyle }'}): ResolvedCitations</code>{' '}
+          — replaces every <code>{'\\cite{key[,key2]}'}</code> with numbered, linked markers (ordered by
+          first appearance, like LaTeX + natbib's numeric style) and returns an HTML bibliography block. If
+          an entry has a <code>url</code>, <code>link</code>, or <code>doi</code> field, its bibliography
+          line is wrapped in a link to that address (checked in that order). Pass{' '}
+          <code>{"{ style: 'ieee' | 'mla' | 'apa' | 'abnt' }"}</code> to format each line per that citation
+          style instead of the plain default — the numbering stays in citation order either way (see the{' '}
+          <code>{'<select>'}</code> in the Basic usage tab above).
         </li>
         <li>
           <code>extractCiteKeys(text: string): string[]</code> / <code>formatEntry(entry: BibEntry): string</code>{' '}
@@ -230,7 +233,9 @@ export default function App() {
             <p className="section-note">
               A <code>.bib</code> textarea feeding a <code>{'<CiteEditor />'}</code> (which gets live{' '}
               <code>{'\\cite{}'}</code> autocomplete from it) plus a preview pane rendering the numbered
-              citations and generated bibliography. Source:{' '}
+              citations and generated bibliography — use the dropdown above the preview to switch it
+              between the plain default and IEEE/MLA/APA/ABNT via <code>resolveCitations</code>'s{' '}
+              <code>style</code> option. Source:{' '}
               <a href={`${REPO_URL}/blob/main/examples/basic-usage.tsx`} target="_blank" rel="noreferrer">
                 examples/basic-usage.tsx
               </a>

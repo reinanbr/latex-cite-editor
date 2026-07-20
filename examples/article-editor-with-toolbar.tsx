@@ -35,7 +35,7 @@ export default function ArticleEditorWithToolbar() {
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Título do artigo..."
+        placeholder="Article title..."
         style={{ fontSize: 20, fontWeight: 600, padding: 8 }}
       />
 
@@ -48,18 +48,18 @@ export default function ArticleEditorWithToolbar() {
           placeholder={'@article{key,\n  author = {...},\n  title = {...},\n  year = {2024}\n}'}
           style={{ width: '100%', fontFamily: 'monospace', fontSize: 12 }}
         />
-        {bibEntries.length > 0 && <p style={{ fontSize: 12, opacity: 0.7 }}>{bibEntries.length} referência(s) carregada(s)</p>}
+        {bibEntries.length > 0 && <p style={{ fontSize: 12, opacity: 0.7 }}>{bibEntries.length} reference(s) loaded</p>}
       </div>
 
       {/* Toolbar driven entirely by CiteEditorHandle — no textarea DOM access */}
       <div style={{ display: 'flex', gap: 6 }}>
-        <button style={btn} onClick={() => editorRef.current?.wrapSelection('**', '**', 'negrito')}>B</button>
-        <button style={{ ...btn, fontStyle: 'italic' }} onClick={() => editorRef.current?.wrapSelection('*', '*', 'itálico')}>I</button>
+        <button style={btn} onClick={() => editorRef.current?.wrapSelection('**', '**', 'bold text')}>B</button>
+        <button style={{ ...btn, fontStyle: 'italic' }} onClick={() => editorRef.current?.wrapSelection('*', '*', 'italic text')}>I</button>
         <button style={btn} onClick={() => editorRef.current?.insertAtLineStart('## ')}>H2</button>
-        <button style={btn} onClick={() => editorRef.current?.wrapSelection('\\cite{', '}', 'chave-do-bib')}>[1] Citar</button>
-        <button style={btn} onClick={() => editorRef.current?.duplicateCurrentLine()}>⧉ Duplicar linha</button>
-        <button style={btn} onClick={() => editorRef.current?.openSearch()}>🔍 Buscar</button>
-        <button style={btn} onClick={() => setPreviewOpen((v) => !v)}>{previewOpen ? '✎ Editar' : '👁 Preview'}</button>
+        <button style={btn} onClick={() => editorRef.current?.wrapSelection('\\cite{', '}', 'bib-key')}>[1] Cite</button>
+        <button style={btn} onClick={() => editorRef.current?.duplicateCurrentLine()}>⧉ Duplicate line</button>
+        <button style={btn} onClick={() => editorRef.current?.openSearch()}>🔍 Search</button>
+        <button style={btn} onClick={() => setPreviewOpen((v) => !v)}>{previewOpen ? '✎ Edit' : '👁 Preview'}</button>
       </div>
 
       {!previewOpen ? (
@@ -69,7 +69,7 @@ export default function ArticleEditorWithToolbar() {
           onChange={setContent}
           bibEntries={bibEntries}
           minHeight="400px"
-          placeholder={'# ' + (title || 'Título') + '\n\nEscreva em Markdown. Use \\cite{chave} para citar — o autocomplete puxa do .bib acima.'}
+          placeholder={'# ' + (title || 'Title') + '\n\nWrite in Markdown. Use \\cite{key} to cite — autocomplete pulls from the .bib above.'}
         />
       ) : (
         <div

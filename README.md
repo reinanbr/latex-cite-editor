@@ -70,6 +70,10 @@ function Editor() {
 // When rendering the article:
 const { text, bibliographyHtml } = resolveCitations(markdownSource, bibEntries);
 const html = renderMarkdown(text) + bibliographyHtml; // plug into your own Markdown renderer
+
+// Optionally format the bibliography list per a citation style (IEEE/MLA/APA/ABNT)
+// instead of the default plain line, while keeping the [1][2][3] citation-order numbering:
+const { bibliographyHtml: ieeeHtml } = resolveCitations(markdownSource, bibEntries, { style: 'ieee' });
 ```
 
 See [`examples/basic-usage.tsx`](examples/basic-usage.tsx) for a minimal editor + live preview,
@@ -140,14 +144,22 @@ const refworksFile = exportBibliography(entries, 'refworks'); // RefWorks tagged
 
 Per-style functions (`formatBibliographyIeee`, `formatEntryMla`, `formatAuthorsApa`, ...) and
 per-format functions (`exportEndNote`, `exportRefMan`, `exportRefWorks`) are also exported directly
-if you don't need the `style`/`format` dispatcher. See
+if you don't need the `style`/`format` dispatcher.
+
+`formatBibliography` is for a *standalone* reference list (it alphabetizes for MLA/APA/ABNT, since
+that's what those standards require). If you're using `\cite{}` + `resolveCitations` instead, pass
+`{ style }` to it directly — see [above](#quickstart) — so the bibliography stays in `[1][2][3]`
+citation order (as it must, to match the in-text markers) while each line is formatted per that
+style.
+
+See
 [`examples/citation-styles.tsx`](examples/citation-styles.tsx) for a live style-switcher + export
 picker, or the [docs site](#docs-site--live-examples).
 
 ## API
 
 - `parseBibtex(source: string): BibEntry[]` — parses `.bib` text (handles nested braces in field values, e.g. `title = {The {Higgs} Boson}`).
-- `resolveCitations(text: string, entries: BibEntry[]): ResolvedCitations` — replaces every `\cite{key[,key2]}` with numbered, linked markers (ordered by first appearance, like LaTeX + natbib's numeric style) and returns an HTML bibliography block. If an entry has a `url`, `link`, or `doi` field, its bibliography line is wrapped in a link to that address (checked in that order).
+- `resolveCitations(text: string, entries: BibEntry[], options?: { style?: CitationStyle }): ResolvedCitations` — replaces every `\cite{key[,key2]}` with numbered, linked markers (ordered by first appearance, like LaTeX + natbib's numeric style) and returns an HTML bibliography block. If an entry has a `url`, `link`, or `doi` field, its bibliography line is wrapped in a link to that address (checked in that order). Pass `{ style: 'ieee' | 'mla' | 'apa' | 'abnt' }` to format each line per that citation style instead of the plain default — the `[1][2][3]` numbering stays in citation order either way. Each `BibliographyItem` also gets an `html` field (the styled line) when `style` is set.
 - `extractCiteKeys(text: string): string[]` / `formatEntry(entry: BibEntry): string` / `resolveEntryUrl(entry: BibEntry): string | undefined` — lower-level building blocks. `formatEntry` already runs author/title/journal through `cleanLatexText`.
 - `formatBibliographyAbnt(entries: BibEntry[]): AbntReference[]` — formats every entry per **ABNT NBR 6023** (see [above](#abnt-bibliography-formatting)) and sorts the result alphabetically by author surname (or title, if authorless). Each `AbntReference` is `{ key, html, sortKey }`, where `html` is escaped and ready to inject (title wrapped in `<strong>`).
 - `formatEntryAbnt(entry: BibEntry): AbntReference` — the single-entry version behind `formatBibliographyAbnt`, if you want to format/sort a list yourself.

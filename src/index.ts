@@ -2,7 +2,7 @@ export { parseBibtex } from './bibtex';
 export type { BibEntry } from './bibtex';
 
 export { extractCiteKeys, formatEntry, resolveEntryUrl, resolveCitations, escapeHtml, CITE_COMMAND_RE } from './citations';
-export type { BibliographyItem, ResolvedCitations } from './citations';
+export type { BibliographyItem, ResolvedCitations, ResolveCitationsOptions } from './citations';
 
 export { formatAuthorsAbnt, formatEntryAbnt, formatBibliographyAbnt } from './abnt';
 export type { AbntReference } from './abnt';
@@ -18,7 +18,7 @@ export type { ApaReference } from './apa';
 
 export type { FormattedReference } from './referenceTypes';
 
-export { formatBibliography, exportBibliography } from './styles';
+export { formatBibliography, formatEntryForStyle, exportBibliography } from './styles';
 export type { CitationStyle, ExportFormat } from './styles';
 
 export { exportEndNote } from './endnote';
