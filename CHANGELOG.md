@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.2
+
+- No functional changes. Points the publish workflow at the renamed `npm_publish` GitHub Environment (was `NPM_TOKEN`) and re-runs it to confirm the publish still works under the new name.
+
 ## 0.4.1
 
 - No functional changes. Gives IEEE, MLA, APA, and the reference-manager export formats their own dedicated README sections (previously condensed into one), matching the existing ABNT section's format/code-sample structure. Version bump to re-run the npm publish workflow end-to-end after rotating the `NPM_TOKEN` secret.
