@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- No functional changes. Gives IEEE, MLA, APA, and the reference-manager export formats their own dedicated README sections (previously condensed into one), matching the existing ABNT section's format/code-sample structure. Version bump to re-run the npm publish workflow end-to-end after rotating the `NPM_TOKEN` secret.
+
 ## 0.4.0
 
 - `resolveCitations(text, entries, options?)` now accepts `{ style: 'ieee' | 'mla' | 'apa' | 'abnt' }` to format each `\cite{}`-driven bibliography line per that citation style, while keeping the `[1][2][3]` numbering in citation order (as opposed to `formatBibliography`, which alphabetizes for a standalone reference list). `BibliographyItem` gains an optional `html` field carrying the styled line.
